@@ -62,7 +62,9 @@
   <label for="soldiers">Number of Soldiers:</label>
   <input type="number" id="soldiers" value="20000">
 
-  <button onclick="calculate()">Calculate</button>
+  
+  <button onclick="calculate(10)">Prioritize Elites trained</button>
+  <button onclick="calculate(1)">Prioritize Total troops trained</button>
 
   <h2>Results</h2>
   <p id="resultElites"></p>
@@ -71,7 +73,7 @@
   <p id="resultSoldiers"></p>
 
   <script>
-    function calculate() {
+    function calculate(pPrioritize) {
           // Get input values
       const gold = parseFloat(document.getElementById("gold").value);
       const eliteCost = parseFloat(document.getElementById("eliteCost").value);
@@ -83,18 +85,18 @@
     "optimize": "capacity",
     "opType": "max",
     "constraints": {
-        "totaltrain": {"max": soldiers},
+        "total": {"max": soldiers},
          "cost": {"max": gold}
     },
     "variables": {
         "elite": {
-            "capacity": 1,
-            "totaltrain": 1,
+            "capacity": pPrioritize,
+            "total": 1,
             "cost": eliteCost
         },
         "spec": {
             "capacity": 1,
-            "totaltrain": 1,
+            "total": 1,
             "cost": specCost
         }
     },
@@ -102,14 +104,35 @@
 };
 
 
+
       // Solve LP problem
       const solution = solver.Solve(model);
-      console.log(solution)
+      
       // Display results
-      document.getElementById("resultElites").textContent = `Train ${solution.elite || 0} units of Elites`;
-      document.getElementById("resultSpecs").textContent = `Train ${solution.spec || 0} units of Specs`;
-      document.getElementById("resultGold").textContent = `Using ${solution.elite * eliteCost + solution.spec * specCost || 0} units of Gold`;
-      document.getElementById("resultSoldiers").textContent = `Total Soldiers: ${solution.elite + solution.spec || 0}`;
+
+
+// Display results
+    document.getElementById("resultElites").textContent = `Train ${solution.elite ? solution.elite + " units of Elites" : "0  units of Elites"}`;
+    document.getElementById("resultSpecs").textContent = `Train ${solution.spec ? solution.spec + " units of Specs" : "0 units of Specs"}`;
+    
+    if (solution.elite !== undefined && solution.spec !== undefined) {
+      
+      document.getElementById("resultGold").textContent = `Using ${solution.elite * eliteCost + solution.spec * specCost} units of Gold`;
+      document.getElementById("resultSoldiers").textContent = `Total Trained: ${solution.elite + solution.spec}`;
+    } else {
+
+      if (solution.elite != undefined) {
+        trained = solution.elite
+        goldSpent = trained * eliteCost
+
+      }
+      else if (solution.spec != undefined) {
+        trained = solution.spec
+        goldSpent = trained * specCost
+      }
+      document.getElementById("resultSoldiers").textContent = `Total Trained: ${trained}`;
+      document.getElementById("resultGold").textContent = `Using ${goldSpent} units of Gold`;
+    }
     }
   </script>
 </body>

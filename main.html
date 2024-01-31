@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UTOPIA - Max Elites vs Specs</title>
+  <script src="https://unpkg.com/javascript-lp-solver/prod/solver.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      color: #333;
+      margin: 20px;
+    }
+
+    h1, h2 {
+      color: #222;
+    }
+
+    label {
+      display: block;
+      margin: 10px 0;
+    }
+
+    input {
+      padding: 8px;
+      margin: 5px 0 15px 0;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    button {
+      background-color: #333;
+      color: #fff;
+      padding: 10px 15px;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background-color: #555;
+    }
+
+    p {
+      margin: 10px 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>UTOPIA - Max Elites vs Specs</h1>
+
+  <label for="gold">Gold:</label>
+  <input type="number" id="gold" value="8000000">
+
+  <label for="eliteCost">Elite Cost:</label>
+  <input type="number" id="eliteCost" value="650">
+
+  <label for="specCost">Spec Cost:</label>
+  <input type="number" id="specCost" value="300">
+
+  <label for="soldiers">Number of Soldiers:</label>
+  <input type="number" id="soldiers" value="20000">
+
+  <button onclick="calculate()">Calculate</button>
+
+  <h2>Results</h2>
+  <p id="resultElites"></p>
+  <p id="resultSpecs"></p>
+  <p id="resultGold"></p>
+  <p id="resultSoldiers"></p>
+
+  <script>
+    function calculate() {
+          // Get input values
+      const gold = parseFloat(document.getElementById("gold").value);
+      const eliteCost = parseFloat(document.getElementById("eliteCost").value);
+      const specCost = parseFloat(document.getElementById("specCost").value);
+      const soldiers = parseFloat(document.getElementById("soldiers").value);
+
+    const model = 
+    {
+    "optimize": "capacity",
+    "opType": "max",
+    "constraints": {
+        "totaltrain": {"max": soldiers},
+         "cost": {"max": gold}
+    },
+    "variables": {
+        "elite": {
+            "capacity": 1,
+            "totaltrain": 1,
+            "cost": eliteCost
+        },
+        "spec": {
+            "capacity": 1,
+            "totaltrain": 1,
+            "cost": specCost
+        }
+    },
+    "ints": {"elite": 1, "spec": 1}
+};
+
+
+      // Solve LP problem
+      const solution = solver.Solve(model);
+      console.log(solution)
+      // Display results
+      document.getElementById("resultElites").textContent = `Train ${solution.elite || 0} units of Elites`;
+      document.getElementById("resultSpecs").textContent = `Train ${solution.spec || 0} units of Specs`;
+      document.getElementById("resultGold").textContent = `Using ${solution.elite * eliteCost + solution.spec * specCost || 0} units of Gold`;
+      document.getElementById("resultSoldiers").textContent = `Total Soldiers: ${solution.elite + solution.spec || 0}`;
+    }
+  </script>
+</body>
+</html>
+
+</body>
+</html>
